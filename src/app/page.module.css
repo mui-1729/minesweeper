@@ -8,7 +8,11 @@
   padding: 0 0.5rem;
 }
 
-.sampleCell {
+.row {
+  display: flex;
+}
+
+.cell {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,8 +21,3 @@
   background: url('~/src/assets/images/icons.png') no-repeat;
   border: 1px solid #000;
 }
-
-.closed {
-  background-color: gray;
-}
-

@@ -37,7 +37,7 @@ const countBoardAround = (x: number, y: number, bombMap: number[][]) => {
     const nx = x + dx,
       ny = y + dy;
     if (nx >= 0 && nx < 9 && ny >= 0 && ny < 9 && bombMap[ny][nx] === 1) {
-      bombCount + 1;
+      return bombCount + 1;
     }
     return bombCount;
   }, 0);
@@ -76,7 +76,10 @@ export default function Home() {
       const nextMap = generateBomb(x, y);
       setBombMap(nextMap);
       setIsFirstClick(false);
-      clickHandler(x, y);
+      const count = countBoardAround(x, y, nextMap);
+      const newInputs = userInputs.map((row) => [...row]);
+      newInputs[y][x] = count;
+      setUserInputs(newInputs);
       return;
     }
     if (bombMap[y][x] === 1) {
@@ -97,7 +100,7 @@ export default function Home() {
         <div key={y} className={styles.row}>
           {row.map((cell, x) => (
             <div key={`${y}-${x}`} className={styles.cell} onClick={() => clickHandler(x, y)}>
-              {cell !== 0 ? cell : ''}
+              {cell === 0 ? '黒' : cell}
             </div>
           ))}
         </div>

@@ -89,10 +89,8 @@ export default function Home() {
       const nextMap = generateBomb(x, y);
       setBombMap(nextMap);
       setIsFirstClick(false);
-      const count = countBoardAround(x, y, nextMap);
       const newInputs = userInputs.map((row) => [...row]);
       connect(x, y, nextMap, newInputs);
-      newInputs[y][x] = count;
       setUserInputs(newInputs);
       return;
     }

@@ -26,8 +26,12 @@
   border: 1px solid #000;
 }
 
-.cellhide {
-  background-color: gray;
+.timer {
+  font-size: 24px;
+}
+
+.cellHide {
+  background: url('~/src/assets/images/mineCover.jpg') no-repeat;
 }
 
 .cell0 {

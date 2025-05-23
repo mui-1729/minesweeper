@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 const directions = [
@@ -59,28 +59,13 @@ const connect = (x: number, y: number, bombMap: number[][], newInputs: number[][
 
 export default function Home() {
   const [isFirstClick, setIsFirstClick] = useState(true);
-  const [userInputs, setUserInputs] = useState([
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-  ]);
-  const [bombMap, setBombMap] = useState([
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ]);
+  const [seconds, setSeconds] = useState(0);
+  const [userInputs, setUserInputs] = useState(
+    Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => -1)),
+  );
+  const [bombMap, setBombMap] = useState(
+    Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
+  );
 
   const clickHandler = (x: number, y: number) => {
     if (userInputs[y][x] !== -1) return;
@@ -99,19 +84,40 @@ export default function Home() {
       return;
     }
 
-    const count = countBoardAround(x, y, bombMap);
     const newInputs = userInputs.map((row) => [...row]);
-    newInputs[y][x] = count;
     connect(x, y, bombMap, newInputs);
     setUserInputs(newInputs);
   };
 
+  const Timer = () => {
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setSeconds((prev) => prev + 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, []);
+  };
+
+  const handleReset = () => {
+    {
+      setUserInputs(Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => -1)));
+      setBombMap(Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)));
+      setIsFirstClick(true);
+      setSeconds(0);
+    }
+  };
+  Timer();
+
   return (
     <div className={styles.container}>
+      <div className={styles.timer}>
+        Time: {seconds}秒<div onClick={handleReset}>リセット</div>
+      </div>
       {userInputs.map((row, y) => (
         <div key={y} className={styles.row}>
           {row.map((cell, x) => {
-            const suffix = cell === -1 ? 'hide' : `${cell}`;
+            const suffix = cell === -1 ? 'Hide' : `${cell}`;
             const className = [styles.cell, styles[`cell${suffix}` as keyof typeof styles]].join(
               ' ',
             );

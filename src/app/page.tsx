@@ -174,25 +174,35 @@ export default function Home() {
         (row, y) => (
           <div key={y} className={styles.row}>
             {row.map((cell, x) => {
-              let classKey: string;
+              type classKeys =
+                | 'cellHide'
+                | 'cellFlag'
+                | 'cellNone'
+                | 'cellBomb'
+                | 'cell0'
+                | 'cell1'
+                | 'cell2'
+                | 'cell3';
+              let classKey: classKeys;
               if (userInputs[y][x] === 'Flag') {
-                classKey = 'Flag';
+                classKey = 'cellFlag';
               } else if (userInputs[y][x] === 'None') {
-                classKey = 'None';
+                classKey = 'cellNone';
               } else if (cell === -1) {
-                classKey = 'Hide';
+                classKey = 'cellHide';
               } else if (cell === -2) {
-                classKey = 'Bomb';
-              } else if (typeof cell === 'number') {
-                classKey = `${cell}`;
+                classKey = 'cellBomb';
               } else {
-                classKey = 'Hide';
+                classKey = `cell${cell}` as classKeys;
               }
+
+              const styleKey = `cell${classKey}` as keyof typeof styles;
+              const dynamicClass = styles[styleKey] ?? '';
 
               return (
                 <div
                   key={`${y}-${x}`}
-                  className={`${styles.cell} ${styles[`cell${classKey}`] ?? ''}`}
+                  className={`${styles.cell} ${dynamicClass}`}
                   onClick={() => LeftClickHandler(x, y)}
                   onContextMenu={(event) => RightClickHandler(event, x, y)}
                 />

@@ -26,6 +26,18 @@
   border: 1px solid #000;
 }
 
+.cellBomb {
+  background: url('~/src/assets/images/icons.png') -300px no-repeat;
+}
+
+.cellFlag {
+  background: url('~/src/assets/images/icons.png') -270px no-repeat;
+}
+
+.cellNone {
+  background: url('~/src/assets/images/icons.png') -240px no-repeat;
+}
+
 .timer {
   font-size: 24px;
 }

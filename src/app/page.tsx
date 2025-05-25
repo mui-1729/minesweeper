@@ -196,8 +196,7 @@ export default function Home() {
                 classKey = `cell${cell}` as classKeys;
               }
 
-              const styleKey = `cell${classKey}` as keyof typeof styles;
-              const dynamicClass = styles[styleKey] ?? '';
+              const dynamicClass = styles[classKey] ?? '';
 
               return (
                 <div

@@ -49,7 +49,6 @@ const countBoardAround = (x: number, y: number, bombMap: number[][]) => {
   }, 0);
 };
 
-// 計算値
 const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] => {
   const currentBoard = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => -1));
   const alreadyVisited = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => false));
@@ -162,14 +161,20 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [bombMap]);
 
+  // 計算値
   const board = bombMap ? calcBoard(userInputs, bombMap) : null;
+  const flagCount = userInputs.flat().filter((cell) => cell === 'Flag').length;
 
   return (
     <div className={styles.container}>
-      <div className={styles.timer}>
-        Time: {seconds}秒 <button onClick={handleReset}>リセット</button>
+      <div className={styles.header}>
+        <div className={styles.flagCount}>🚩{flagCount}</div>
+        <button className={styles.resetButton} onClick={handleReset}>
+          ☺
+        </button>
+        <div className={styles.timer} />
+        <div> {seconds} 秒</div>
       </div>
-
       {(board ?? Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => -1))).map(
         (row, y) => (
           <div key={y} className={styles.row}>

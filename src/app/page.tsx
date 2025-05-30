@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 type cellAction = 'None' | 'Open' | 'Flag' | null;
+
+type gameState = { state: 'win' | 'lose' | 'normal' };
 type Setting = {
   width: number;
   height: number;
@@ -113,6 +115,36 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
   return currentBoard;
 };
 
+const TimerDisplay = ({ seconds }: { seconds: number }) => {
+  const digits = seconds.toString().padStart(3, '0').split('');
+  return (
+    <div className={styles.timer}>
+      {digits.map((digit, i) => (
+        <div
+          key={i}
+          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`}
+          aria-label={digit}
+        />
+      ))}
+    </div>
+  );
+};
+
+const FlagDisplay = ({ flags }: { flags: number }) => {
+  const digits = Math.max(0, flags).toString().padStart(3, '0').split('');
+  return (
+    <div className={styles.flagCount}>
+      {digits.map((digit, i) => (
+        <div
+          key={i}
+          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`}
+          aria-label={digit}
+        />
+      ))}
+    </div>
+  );
+};
+
 export default function Home() {
   const [level, setLevel] = useState<Level>('easy');
   const [customSetting, setCustomSetting] = useState<Setting>({
@@ -214,23 +246,6 @@ export default function Home() {
     setSeconds(0);
   };
 
-  useEffect(() => {
-    const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
-    if (isFirstMap === true) {
-      setSeconds(0);
-      isGameFinish = false;
-    }
-    if (isGameFinish === false) {
-      if (win(board, bombMap) === true) {
-        isGameFinish = true;
-      }
-    }
-    const timer = setInterval(() => {
-      setSeconds((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [board, bombMap]);
-
   const win = (board: number[][], bombMap: number[][]) => {
     for (let y = 0; y < bombMap.length; y++) {
       for (let x = 0; x < bombMap[0].length; x++) {
@@ -242,7 +257,45 @@ export default function Home() {
     return true;
   };
 
+  const lose = (userInputs: cellAction[][], bombMap: number[][]) => {
+    for (let y = 0; y < bombMap.length; y++) {
+      for (let x = 0; x < bombMap[0].length; x++) {
+        if (userInputs[y][x] === 'Open' && bombMap[y][x] === 1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
+    if (isFirstMap === true) {
+      setSeconds(0);
+      isGameFinish = false;
+    }
+    if (isGameFinish === true) return;
+    if (isGameFinish === false) {
+      if (win(board, bombMap) === true) {
+        isGameFinish = true;
+      }
+      if (lose(userInputs, bombMap) === true) {
+        isGameFinish = true;
+      }
+    }
+    const timer = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [board, bombMap, userInputs]);
+
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
+
+  const resetButtonFace = () => {
+    if (win(board, bombMap) === true) return '';
+    if (lose(userInputs, bombMap) === true) return 'lose';
+    else return 'normal';
+  };
 
   return (
     <div className={styles.container}>
@@ -294,12 +347,12 @@ export default function Home() {
       )}
       <div className={styles.bigBoard}>
         <div className={styles.header}>
-          <div className={styles.flagCount}>{flagCount}</div>
-          <button className={styles.resetButton} onClick={resetClickHandler}>
-            ☺
-          </button>
-          <div className={styles.timer} />
-          <div>{seconds}</div>
+          <FlagDisplay flags={flagCount} />
+          <button
+            className={`${styles.face} ${win(board, bombMap) ? styles.cool : lose(userInputs, bombMap) ? styles.sad : styles.smile}`}
+            onClick={resetClickHandler}
+          />
+          <TimerDisplay seconds={seconds} />
         </div>
         <div className={styles.board}>
           {(

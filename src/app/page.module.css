@@ -52,26 +52,126 @@
   border-left: 5px solid #888;
 }
 
-.header > * {
+/* .header > * {
   flex: 1;
   text-align: center;
+} */
+
+.face {
+  box-sizing: border-box;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 47px;
+  height: 47px;
+  padding: 0;
+  cursor: pointer;
+  background-image: url('~/src/assets/images/icons.png');
+  background-repeat: no-repeat;
+  background-size: 600px 43px;
+  border-top: 5px solid#fff;
+  border-right: 5px solid #888;
+  border-bottom: 5px solid #888;
+  border-left: 5px solid #fff;
+}
+
+.face.smile {
+  background-position: -474px -3px;
+}
+
+.face.cool {
+  background-position: -517px -3px;
+}
+
+.face.sad {
+  background-position: -560px -3px;
 }
 
 .resetButton {
-  padding: 8px;
+  padding: 1px;
   border: 1px outset #888;
 }
 
 .timer {
-  font-size: 20px;
   text-align: center;
   cursor: pointer;
+  background-color: #000;
+  border-top: 3px solid #808080;
+  border-right: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  border-left: 3px solid #808080;
+}
+
+.timerDigit {
+  float: left;
+  width: 26px;
+  height: 47px;
+  background: url('~/src/assets/images/digital.png') no-repeat;
+  background-size: 25px 498px;
+  border: 1px solid#000;
+}
+
+.timerDigit0 {
+  background-position-y: 0;
+}
+
+.timerDigit1 {
+  background-position-y: -50px;
+}
+
+.timerDigit2 {
+  background-position-y: -100px;
+}
+
+.timerDigit3 {
+  background-position-y: -150px;
+}
+
+.timerDigit4 {
+  background-position-y: -200px;
+}
+
+.timerDigit5 {
+  background-position-y: -250px;
+}
+
+.timerDigit6 {
+  background-position-y: -300px;
+}
+
+.timerDigit7 {
+  background-position-y: -350px;
+}
+
+.timerDigit8 {
+  background-position-y: -400px;
+}
+
+.timerDigit9 {
+  background-position-y: -450px;
+}
+
+.flag {
+  float: left;
+  width: 25px;
+  height: 47px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #000;
+  background-size: 25px 495px;
+  border-top: 3px solid #808080;
+  border-right: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  border-left: 3px solid #808080;
 }
 
 .flagCount {
-  font-size: 20px;
   text-align: center;
   cursor: pointer;
+  background-color: #000;
+  border-top: 3px solid #808080;
+  border-right: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  border-left: 3px solid #808080;
 }
 
 .cell {

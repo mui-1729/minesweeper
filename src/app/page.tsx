@@ -17,12 +17,6 @@ const BasicSetting: Record<basicLevel, Setting> = {
   normal: { width: 16, height: 16, bombCount: 40 },
   hard: { width: 30, height: 16, bombCount: 99 },
 };
-
-const custom: Setting = {
-  width: 20,
-  height: 20,
-  bombCount: 20,
-};
 //方向
 const directions = [
   [1, 0],
@@ -36,7 +30,7 @@ const directions = [
 ];
 
 // ゲームオーバー判定
-let isGameOver = false;
+let isGameFinish = false;
 
 // 初手マップ生成
 const generateBomb = (
@@ -94,8 +88,6 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
   const blankChain = (x: number, y: number) => {
     if (x < 0 || x >= width || y < 0 || y >= height || currentBoard[y][x] !== -1) return;
 
-    currentBoard[y][x] === -1;
-
     if (bombMap[y][x] === 1) return;
 
     const count = countBoardAround(x, y, bombMap);
@@ -108,8 +100,8 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
     }
   };
 
-  for (let y = 0; y < 9; y++) {
-    for (let x = 0; x < 9; x++) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
       if (userInputs[y][x] === 'Open') {
         currentBoard[y][x] = bombMap[y][x] === 1 ? -2 : currentBoard[y][x];
         if (bombMap[y][x] !== 1) {
@@ -123,8 +115,15 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
 
 export default function Home() {
   const [level, setLevel] = useState<Level>('easy');
-  const currentSetting: Setting = level === 'custom' ? custom : BasicSetting[level];
+  const [customSetting, setCustomSetting] = useState<Setting>({
+    width: 9,
+    height: 9,
+    bombCount: 10,
+  });
+
+  const currentSetting: Setting = level === 'custom' ? customSetting : BasicSetting[level];
   const { width, height, bombCount } = currentSetting;
+
   const [seconds, setSeconds] = useState(0);
   const [userInputs, setUserInputs] = useState<cellAction[][]>(
     Array.from({ length: height }, () => Array.from({ length: width }, () => null)),
@@ -133,12 +132,24 @@ export default function Home() {
     Array.from({ length: height }, () => Array.from({ length: width }, () => 0)),
   );
 
+  // 計算値
+  const board = calcBoard(userInputs, bombMap);
+
+  useEffect(() => {
+    const newInputs = Array.from({ length: height }, () =>
+      Array.from({ length: width }, () => null),
+    );
+    const newBombMap = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
+    setUserInputs(newInputs);
+    setBombMap(newBombMap);
+  }, [level, customSetting, height, width]);
+
   const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
 
   const RightClickHandler = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
 
-    if (isGameOver === true) return;
+    if (isGameFinish === true) return;
 
     setUserInputs((prev) => {
       const newInputs = prev.map((row) => [...row]);
@@ -151,7 +162,7 @@ export default function Home() {
   };
 
   const LeftClickHandler = (x: number, y: number) => {
-    if (isGameOver === true) return;
+    if (isGameFinish === true) return;
     if (userInputs[y][x] !== null) return;
 
     if (isFirstMap === true) {
@@ -166,7 +177,7 @@ export default function Home() {
     }
 
     if (bombMap[y][x] === 1) {
-      isGameOver = true;
+      isGameFinish = true;
 
       setUserInputs((prev) => {
         const newInputs = prev.map((row) => [...row]);
@@ -188,8 +199,16 @@ export default function Home() {
     });
   };
 
+  useEffect(() => {
+    if (isGameFinish === true) return;
+    if (win(board, bombMap) === true) {
+      alert('clear');
+      isGameFinish = true;
+    }
+  }, [board, bombMap]);
+
   const resetClickHandler = () => {
-    isGameOver = false;
+    isGameFinish = false;
     setUserInputs(Array.from({ length: height }, () => Array.from({ length: width }, () => null)));
     setBombMap(Array.from({ length: height }, () => Array.from({ length: width }, () => 0)));
     setSeconds(0);
@@ -199,15 +218,29 @@ export default function Home() {
     const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
     if (isFirstMap === true) {
       setSeconds(0);
+      isGameFinish = false;
+    }
+    if (isGameFinish === false) {
+      if (win(board, bombMap) === true) {
+        isGameFinish = true;
+      }
     }
     const timer = setInterval(() => {
       setSeconds((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [bombMap]);
+  }, [board, bombMap]);
 
-  // 計算値
-  const board = calcBoard(userInputs, bombMap);
+  const win = (board: number[][], bombMap: number[][]) => {
+    for (let y = 0; y < bombMap.length; y++) {
+      for (let x = 0; x < bombMap[0].length; x++) {
+        if (bombMap[y][x] === 0 && board[y][x] === -1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
@@ -219,17 +252,59 @@ export default function Home() {
         <option value={'hard'}>上級</option>
         <option value={'custom'}>カスタム</option>
       </select>
-      <div className={styles.header}>
-        <div className={styles.flagCount}>🚩{flagCount}</div>
-        <button className={styles.resetButton} onClick={resetClickHandler}>
-          ☺
-        </button>
-        <div className={styles.timer} />
-        <div> {seconds} 秒</div>
-      </div>
-      <div className={styles.board}>
-        {(board ?? Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => -1))).map(
-          (row, y) => (
+      {level === 'custom' && (
+        <div className={styles.custom}>
+          <label>
+            横 :{' '}
+            <input
+              type="number"
+              min={5}
+              max={40}
+              value={customSetting.width}
+              onChange={(event) =>
+                setCustomSetting((prev) => ({ ...prev, width: Number(event.target.value) }))
+              }
+            />
+          </label>
+          <label>
+            縦 :{' '}
+            <input
+              type="number"
+              min={5}
+              max={40}
+              value={customSetting.height}
+              onChange={(event) =>
+                setCustomSetting((prev) => ({ ...prev, height: Number(event.target.value) }))
+              }
+            />
+          </label>
+          <label>
+            爆弾数 :{' '}
+            <input
+              type="number"
+              min={1}
+              max={customSetting.width * customSetting.height - 9}
+              value={customSetting.bombCount}
+              onChange={(event) =>
+                setCustomSetting((prev) => ({ ...prev, bombCount: Number(event.target.value) }))
+              }
+            />
+          </label>
+        </div>
+      )}
+      <div className={styles.bigBoard}>
+        <div className={styles.header}>
+          <div className={styles.flagCount}>{flagCount}</div>
+          <button className={styles.resetButton} onClick={resetClickHandler}>
+            ☺
+          </button>
+          <div className={styles.timer} />
+          <div>{seconds}</div>
+        </div>
+        <div className={styles.board}>
+          {(
+            board ?? Array.from({ length: height }, () => Array.from({ length: width }, () => -1))
+          ).map((row, y) => (
             <div key={y} className={styles.row}>
               {row.map((cell, x) => {
                 type classKeys =
@@ -268,8 +343,8 @@ export default function Home() {
                 );
               })}
             </div>
-          ),
-        )}
+          ))}
+        </div>
       </div>
     </div>
   );

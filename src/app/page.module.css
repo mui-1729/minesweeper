@@ -8,53 +8,74 @@
 }
 
 .board {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  width: 100%;
   background-color: #c6c6c6;
+  border-top: 5px solid #888;
+  border-right: 5px solid #fff;
+  border-bottom: 5px solid #fff;
+  border-left: 5px solid #888;
 }
 
 .row {
   display: flex;
 }
 
-.header {
+.bigBoard {
   display: flex;
+  flex-flow: column;
   align-items: center;
   justify-content: center;
-  width: 270px;
-  margin-bottom: 10px;
-  border: 2px solid #888;
-  border-color: #c0c0c0;
-  box-shadow:
-    inset -1px -1px 0 #000,
-    inset 1px 1px 0 #fff;
+  width: fit-content;
+  padding: 1.5%;
+  background-color: #c6c6c6;
+  border-top: 5px solid#fff;
+  border-right: 5px solid #888;
+  border-bottom: 5px solid #888;
+  border-left: 5px solid #fff;
+  box-shadow: -1px -1px 6px -2px #555;
+}
+
+.header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+  border-top: 5px solid#888;
+  border-right: 5px solid #fff;
+  border-bottom: 5px solid #fff;
+  border-left: 5px solid #888;
+}
+
+.header > * {
+  flex: 1;
+  text-align: center;
 }
 
 .resetButton {
-  width: 30px;
-  height: 30px;
+  padding: 8px;
+  border: 1px outset #888;
+}
+
+.timer {
   font-size: 20px;
   text-align: center;
   cursor: pointer;
-  background: #fff;
-  border: 2px solid #888;
-  box-shadow:
-    inset -1px -1px 0 #000,
-    inset 1px 1px 0 #fff;
 }
 
 .flagCount {
-  width: 100px;
-  height: 30px;
-  margin-right: auto;
   font-size: 20px;
   text-align: center;
   cursor: pointer;
-  background: #fff;
-  border: 2px solid #888;
 }
 
 .cell {
+  float: left;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,13 +96,6 @@
   background: url('~/src/assets/images/icons.png') -240px no-repeat;
 }
 
-.timer {
-  width: 100px;
-  height: 30px;
-  margin-left: auto;
-  font-size: 24px;
-}
-
 .cellHide {
   display: flex;
   align-items: center;
@@ -89,10 +103,16 @@
   width: 30px;
   height: 30px;
   background-color: #c6c6c6;
-  border-top: 3px outset #fff;
-  border-right: 3px outset #808080;
-  border-bottom: 3px outset #808080;
-  border-left: 3px outset #fff;
+  border-top: 3.5px solid#fff;
+  border-right: 3.5px solid #888;
+  border-bottom: 3.5px solid #888;
+  border-left: 3.5px solid #fff;
+}
+
+.custom {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .cell0 {

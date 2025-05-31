@@ -52,11 +52,6 @@
   border-left: 5px solid #888;
 }
 
-/* .header > * {
-  flex: 1;
-  text-align: center;
-} */
-
 .face {
   box-sizing: border-box;
   flex-grow: 0;
@@ -174,79 +169,137 @@
   border-left: 3px solid #808080;
 }
 
-.cell {
-  float: left;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #000;
-}
-
-.cellBomb {
-  background: url('~/src/assets/images/icons.png') -300px no-repeat;
-}
-
-.cellFlag {
-  background: url('~/src/assets/images/icons.png') -270px no-repeat;
-}
-
-.cellNone {
-  background: url('~/src/assets/images/icons.png') -240px no-repeat;
-}
-
-.cellHide {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background-color: #c6c6c6;
-  border-top: 3.5px solid#fff;
-  border-right: 3.5px solid #888;
-  border-bottom: 3.5px solid #888;
-  border-left: 3.5px solid #fff;
-}
-
 .custom {
   display: flex;
   gap: 8px;
   margin-top: 10px;
 }
 
+.cellBomb {
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -300px 0 !important;
+}
+
+.cellBombHit {
+  background-color: red;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -300px 0 !important;
+}
+
+.cell {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
+}
+
+.cellHide {
+  width: 100%;
+  height: 100%;
+  background-color: #c6c6c6;
+  border-top: 3.5px solid #fff;
+  border-right: 3.5px solid #888;
+  border-bottom: 3.5px solid #888;
+  border-left: 3.5px solid #fff;
+}
+
+.cellFlag,
+.cellNone,
+.cellBomb,
+.cellBombHit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.cellFlag {
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -270px;
+}
+
+.cellNone {
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -240px;
+}
+
+.cellFlagVisible {
+  display: block;
+}
+
+.cell.clicked .cellFlagVisible {
+  display: block;
+}
+
+.cell0,
+.cell1,
+.cell2,
+.cell3,
+.cell4,
+.cell5,
+.cell6,
+.cell7,
+.cell8 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #c6c6c6;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+}
+
 .cell0 {
   background-color: #c6c6c6;
+  background-image: none;
 }
 
 .cell1 {
-  background: url('~/src/assets/images/icons.png') no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: 0;
 }
 
 .cell2 {
-  background: url('~/src/assets/images/icons.png') -30px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -30px;
 }
 
 .cell3 {
-  background: url('~/src/assets/images/icons.png') -60px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -60px;
 }
 
 .cell4 {
-  background: url('~/src/assets/images/icons.png') -90px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -90px;
 }
 
 .cell5 {
-  background: url('~/src/assets/images/icons.png') -120px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -120px;
 }
 
 .cell6 {
-  background: url('~/src/assets/images/icons.png') -150px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -150px;
 }
 
 .cell7 {
-  background: url('~/src/assets/images/icons.png') -180px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -180px;
 }
 
 .cell8 {
-  background: url('~/src/assets/images/icons.png') -210px no-repeat;
+  background-image: url('~/src/assets/images/icons.png');
+  background-position: -210px;
 }

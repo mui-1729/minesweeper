@@ -81,11 +81,6 @@
   background-position: -560px -3px;
 }
 
-.resetButton {
-  padding: 1px;
-  border: 1px outset #888;
-}
-
 .timer {
   text-align: center;
   cursor: pointer;
@@ -169,137 +164,107 @@
   border-left: 3px solid #808080;
 }
 
+.cell {
+  float: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
+}
+
+.cellBomb {
+  background: url('~/src/assets/images/icons.png') -300px no-repeat;
+}
+
+.cellClickBomb {
+  background: url('~/src/assets/images/icons.png') -300px no-repeat;
+  background-color: red;
+}
+
+.cellFlag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: url('~/src/assets/images/icons.png') -207px no-repeat;
+  background-color: #c6c6c6;
+  background-origin: content-box;
+  background-size: 325px 23px;
+  border-top: 3.5px solid#fff;
+  border-right: 3.5px solid #888;
+  border-bottom: 3.5px solid #888;
+  border-left: 3.5px solid #fff;
+}
+
+.cellNone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: url('~/src/assets/images/icons.png') -185px no-repeat;
+  background-color: #c6c6c6;
+  background-size: 325px 23px;
+  border-top: 3.5px solid#fff;
+  border-right: 3.5px solid #888;
+  border-bottom: 3.5px solid #888;
+  border-left: 3.5px solid #fff;
+}
+
+.cellHide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background-color: #c6c6c6;
+  border-top: 3.5px solid#fff;
+  border-right: 3.5px solid #888;
+  border-bottom: 3.5px solid #888;
+  border-left: 3.5px solid #fff;
+}
+
 .custom {
   display: flex;
   gap: 8px;
   margin-top: 10px;
 }
 
-.cellBomb {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -300px 0 !important;
-}
-
-.cellBombHit {
-  background-color: red;
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -300px 0 !important;
-}
-
-.cell {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #000;
-}
-
-.cellHide {
-  width: 100%;
-  height: 100%;
-  background-color: #c6c6c6;
-  border-top: 3.5px solid #fff;
-  border-right: 3.5px solid #888;
-  border-bottom: 3.5px solid #888;
-  border-left: 3.5px solid #fff;
-}
-
-.cellFlag,
-.cellNone,
-.cellBomb,
-.cellBombHit {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.cellFlag {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -270px;
-}
-
-.cellNone {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -240px;
-}
-
-.cellFlagVisible {
-  display: block;
-}
-
-.cell.clicked .cellFlagVisible {
-  display: block;
-}
-
-.cell0,
-.cell1,
-.cell2,
-.cell3,
-.cell4,
-.cell5,
-.cell6,
-.cell7,
-.cell8 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background-color: #c6c6c6;
-  background-repeat: no-repeat;
-  background-position: center;
-  border: none;
-}
-
 .cell0 {
   background-color: #c6c6c6;
-  background-image: none;
 }
 
 .cell1 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: 0;
+  background: url('~/src/assets/images/icons.png') no-repeat;
 }
 
 .cell2 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -30px;
+  background: url('~/src/assets/images/icons.png') -30px no-repeat;
 }
 
 .cell3 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -60px;
+  background: url('~/src/assets/images/icons.png') -60px no-repeat;
 }
 
 .cell4 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -90px;
+  background: url('~/src/assets/images/icons.png') -90px no-repeat;
 }
 
 .cell5 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -120px;
+  background: url('~/src/assets/images/icons.png') -120px no-repeat;
 }
 
 .cell6 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -150px;
+  background: url('~/src/assets/images/icons.png') -150px no-repeat;
 }
 
 .cell7 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -180px;
+  background: url('~/src/assets/images/icons.png') -180px no-repeat;
 }
 
 .cell8 {
-  background-image: url('~/src/assets/images/icons.png');
-  background-position: -210px;
+  background: url('~/src/assets/images/icons.png') -210px no-repeat;
 }

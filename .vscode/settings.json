@@ -10,7 +10,8 @@
   "typescript.referencesCodeLens.enabled": true,
   "files.eol": "\n",
   "editor.tabSize": 2,
-  "stylelint.validate": ["css"],
+  "stylelint.validate": ["css", "scss", "postcss"],
+
 
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,

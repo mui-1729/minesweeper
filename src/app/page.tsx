@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './page.module.css';
 
 type cellAction = 'Question' | 'Open' | 'Flag' | 'ClickBomb' | null;
@@ -29,9 +29,6 @@ const directions = [
   [1, -1],
   [-1, 1],
 ];
-
-// ゲームオーバー判定
-let isGameFinish = false;
 
 // 初手マップ生成
 const generateBomb = (
@@ -132,12 +129,10 @@ const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const digits = seconds.toString().padStart(3, '0').split('');
   return (
     <div className={styles.timer}>
-      {digits.map((digit, i) => (
-        <div
-          key={i}
-          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`] as timerDigitKey}`}
-        />
-      ))}
+      {digits.map((digit, i) => {
+        const key = `timerDigit${digit}` as timerDigitKey;
+        return <div key={i} className={`${styles.timerDigit} ${styles[key]}`} />;
+      })}
     </div>
   );
 };
@@ -147,12 +142,10 @@ const FlagDisplay = ({ flags }: { flags: number }) => {
   const digits = Math.max(0, flags).toString().padStart(3, '0').split('');
   return (
     <div className={styles.flagCount}>
-      {digits.map((digit, i) => (
-        <div
-          key={i}
-          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`] as timerDigitKey}`}
-        />
-      ))}
+      {digits.map((digit, i) => {
+        const key = `timerDigit${digit}` as timerDigitKey;
+        return <div key={i} className={`${styles.timerDigit} ${styles[key]}`} />;
+      })}
     </div>
   );
 };
@@ -169,6 +162,10 @@ export default function Home() {
   const { width, height, bombCount } = currentSetting;
 
   const [seconds, setSeconds] = useState(0);
+  const secondsRef = useRef(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isGameFinishRef = useRef(false);
+
   const [userInputs, setUserInputs] = useState<cellAction[][]>(
     Array.from({ length: height }, () => Array.from({ length: width }, () => null)),
   );
@@ -187,6 +184,10 @@ export default function Home() {
     const newBombMap = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
     setUserInputs(newInputs);
     setBombMap(newBombMap);
+    isGameFinishRef.current = false;
+    secondsRef.current = 0;
+    setSeconds(0);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, [level, customSetting, height, width]);
 
   const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
@@ -194,7 +195,7 @@ export default function Home() {
   const RightClickHandler = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
 
-    if (isGameFinish === true) return;
+    if (isGameFinishRef.current === true) return;
 
     setUserInputs((prev) => {
       const newInputs = prev.map((row) => [...row]);
@@ -207,7 +208,7 @@ export default function Home() {
   };
 
   const LeftClickHandler = (clickX: number, clickY: number) => {
-    if (isGameFinish === true) return;
+    if (isGameFinishRef.current === true) return;
     if (userInputs[clickY][clickX] !== null) return;
 
     if (isFirstMap === true) {
@@ -222,7 +223,8 @@ export default function Home() {
     }
 
     if (bombMap[clickY][clickX] === 1) {
-      isGameFinish = true;
+      isGameFinishRef.current = true;
+      if (timerRef.current) clearInterval(timerRef.current);
 
       setUserInputs((prev) => {
         const newInputs = prev.map((row) => [...row]);
@@ -252,8 +254,9 @@ export default function Home() {
     });
   };
 
+  // クリア時の旗立て
   useEffect(() => {
-    if (isGameFinish === true) return;
+    if (isGameFinishRef.current === true) return;
     if (win(board, bombMap) === true) {
       setUserInputs((prevUserInputs) => {
         const newInputs = prevUserInputs.map((row) => [...row]);
@@ -266,32 +269,17 @@ export default function Home() {
         }
         return newInputs;
       });
-      isGameFinish = true;
+      isGameFinishRef.current = true;
     }
   }, [board, bombMap, height, width]);
 
-  useEffect(() => {
-    if (isGameFinish) return;
-
-    const newInputs = userInputs.map((row) => [...row]);
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (board[y][x] >= 0) {
-          if (newInputs[y][x] !== 'Open') {
-            newInputs[y][x] = 'Open';
-            setUserInputs(newInputs);
-          }
-        }
-      }
-    }
-  }, [board, userInputs, height, width, setUserInputs]);
-
   const resetClickHandler = () => {
-    isGameFinish = false;
+    isGameFinishRef.current = false;
     setUserInputs(Array.from({ length: height }, () => Array.from({ length: width }, () => null)));
     setBombMap(Array.from({ length: height }, () => Array.from({ length: width }, () => 0)));
+    secondsRef.current = 0;
     setSeconds(0);
+    if (timerRef.current) clearInterval(timerRef.current);
   };
 
   const win = (board: number[][], bombMap: number[][]) => {
@@ -316,26 +304,46 @@ export default function Home() {
     return false;
   };
 
+  // 時間関係
   useEffect(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (isGameFinishRef.current) {
+      return;
+    }
+
     const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
-    if (isFirstMap === true) {
+
+    if (isFirstMap) {
+      secondsRef.current = 0;
       setSeconds(0);
-      isGameFinish = false;
+      return;
     }
-    if (isGameFinish === true) return;
-    if (isGameFinish === false) {
-      if (win(board, bombMap) === true) {
-        isGameFinish = true;
-      }
-      if (lose(userInputs, bombMap) === true) {
-        isGameFinish = true;
-      }
-    }
-    if (isFirstMap || isGameFinish) return;
-    const timer = setInterval(() => {
-      setSeconds((prev) => prev + 1);
+
+    timerRef.current = setInterval(() => {
+      secondsRef.current += 1;
+      setSeconds(secondsRef.current);
     }, 1000);
-    return () => clearInterval(timer);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [bombMap, userInputs, board]);
+
+  // ゲーム終了判定
+  useEffect(() => {
+    if (isGameFinishRef.current) return;
+
+    if (win(board, bombMap) || lose(userInputs, bombMap)) {
+      isGameFinishRef.current = true;
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
   }, [board, bombMap, userInputs]);
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
@@ -436,7 +444,7 @@ export default function Home() {
                 } else {
                   if (cell >= 0) {
                     classKey = `cell${cell}` as classKeys;
-                  } else if (cell === -2 && isGameFinish) {
+                  } else if (cell === -2 && isGameFinishRef) {
                     classKey = 'cellBomb';
                   } else {
                     classKey = 'cellHide';

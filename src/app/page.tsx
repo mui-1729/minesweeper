@@ -115,13 +115,27 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
   return currentBoard;
 };
 
+type timerDigitKey =
+  | 'timerDigit1'
+  | 'timerDigit2'
+  | 'timerDigit3'
+  | 'timerDigit4'
+  | 'timerDigit5'
+  | 'timerDigit6'
+  | 'timerDigit7'
+  | 'timerDigit8'
+  | 'timerDigit9';
+
 //タイマーデジタル表記
 const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const digits = seconds.toString().padStart(3, '0').split('');
   return (
     <div className={styles.timer}>
       {digits.map((digit, i) => (
-        <div key={i} className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`} />
+        <div
+          key={i}
+          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`] as timerDigitKey}`}
+        />
       ))}
     </div>
   );
@@ -133,7 +147,10 @@ const FlagDisplay = ({ flags }: { flags: number }) => {
   return (
     <div className={styles.flagCount}>
       {digits.map((digit, i) => (
-        <div key={i} className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`} />
+        <div
+          key={i}
+          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`] as timerDigitKey}`}
+        />
       ))}
     </div>
   );

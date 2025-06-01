@@ -124,7 +124,8 @@ type timerDigitKey =
   | 'timerDigit6'
   | 'timerDigit7'
   | 'timerDigit8'
-  | 'timerDigit9';
+  | 'timerDigit9'
+  | 'timerDigit0';
 
 //タイマーデジタル表記
 const TimerDisplay = ({ seconds }: { seconds: number }) => {

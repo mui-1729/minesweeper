@@ -140,20 +140,6 @@
   background-position-y: -450px;
 }
 
-.flag {
-  float: left;
-  width: 25px;
-  height: 47px;
-  text-align: center;
-  cursor: pointer;
-  background-color: #000;
-  background-size: 25px 495px;
-  border-top: 3px solid #808080;
-  border-right: 3px solid #fff;
-  border-bottom: 3px solid #fff;
-  border-left: 3px solid #808080;
-}
-
 .flagCount {
   text-align: center;
   cursor: pointer;
@@ -199,7 +185,7 @@
   border-left: 3.5px solid #fff;
 }
 
-.cellNone {
+.cellQuestion {
   display: flex;
   align-items: center;
   justify-content: center;

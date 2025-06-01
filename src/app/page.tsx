@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
-type cellAction = 'None' | 'Open' | 'Flag' | 'ClickBomb' | null;
+type cellAction = 'Question' | 'Open' | 'Flag' | 'ClickBomb' | null;
 
 type Setting = {
   width: number;
@@ -50,7 +50,7 @@ const generateBomb = (
     const x = Math.floor(Math.random() * width);
     const y = Math.floor(Math.random() * height);
 
-    if (Math.abs(x - firstX) <= 1 && Math.abs(y - firstY) <= 1) continue;
+    if (x === firstX && y === firstY) continue;
 
     if ((x !== firstX || y !== firstY) && newMap[y][x] === 0) {
       newMap[y][x] = 1;
@@ -108,36 +108,32 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
         : userInputs[y][x] === 'Open'
           ? bombMap[y][x] === 1
             ? (currentBoard[y][x] = -2)
-            : currentBoard[y][x] === -1 && blankChain(y, x)
+            : currentBoard[y][x] === -1 && blankChain(x, y)
           : null;
     }
   }
   return currentBoard;
 };
 
+//タイマーデジタル表記
 const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const digits = seconds.toString().padStart(3, '0').split('');
   return (
     <div className={styles.timer}>
       {digits.map((digit, i) => (
-        <div
-          key={i}
-          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`}
-        />
+        <div key={i} className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`} />
       ))}
     </div>
   );
 };
 
+// 旗デジタル表記
 const FlagDisplay = ({ flags }: { flags: number }) => {
   const digits = Math.max(0, flags).toString().padStart(3, '0').split('');
   return (
     <div className={styles.flagCount}>
       {digits.map((digit, i) => (
-        <div
-          key={i}
-          className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`}
-        />
+        <div key={i} className={`${styles.timerDigit} ${styles[`timerDigit${digit}`]}`} />
       ))}
     </div>
   );
@@ -165,6 +161,7 @@ export default function Home() {
   // 計算値
   const board = calcBoard(userInputs, bombMap);
 
+  // マップ更新
   useEffect(() => {
     const newInputs = Array.from({ length: height }, () =>
       Array.from({ length: width }, () => null),
@@ -183,7 +180,7 @@ export default function Home() {
 
     setUserInputs((prev) => {
       const newInputs = prev.map((row) => [...row]);
-      const states: cellAction[] = [null, 'Flag', 'None'];
+      const states: cellAction[] = [null, 'Flag', 'Question'];
       const currentIndex = states.indexOf(newInputs[y][x]);
       const nextIndex = (currentIndex + 1) % states.length;
       newInputs[y][x] = states[nextIndex];
@@ -256,26 +253,19 @@ export default function Home() {
   }, [board, bombMap, height, width]);
 
   useEffect(() => {
-    if (isGameFinish) {
-      return;
-    }
+    if (isGameFinish) return;
 
     const newInputs = userInputs.map((row) => [...row]);
-    let changed = false;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (board[y][x] >= 0) {
           if (newInputs[y][x] !== 'Open') {
             newInputs[y][x] = 'Open';
-            changed = true;
+            setUserInputs(newInputs);
           }
         }
       }
-    }
-
-    if (changed) {
-      setUserInputs(newInputs);
     }
   }, [board, userInputs, height, width, setUserInputs]);
 
@@ -323,6 +313,7 @@ export default function Home() {
         isGameFinish = true;
       }
     }
+    if (isFirstMap || isGameFinish) return;
     const timer = setInterval(() => {
       setSeconds((prev) => prev + 1);
     }, 1000);
@@ -397,7 +388,7 @@ export default function Home() {
                 type classKeys =
                   | 'cellHide'
                   | 'cellFlag'
-                  | 'cellNone'
+                  | 'cellQuestion'
                   | 'cellBomb'
                   | 'cellClickBomb'
                   | 'cell0'
@@ -412,8 +403,8 @@ export default function Home() {
                 let classKey: classKeys;
                 if (userInputs[y][x] === 'Flag') {
                   classKey = 'cellFlag';
-                } else if (userInputs[y][x] === 'None') {
-                  classKey = 'cellNone';
+                } else if (userInputs[y][x] === 'Question') {
+                  classKey = 'cellQuestion';
                 } else if (userInputs[y][x] === 'ClickBomb') {
                   classKey = 'cellClickBomb';
                 } else if (userInputs[y][x] === 'Open') {

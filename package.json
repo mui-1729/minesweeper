@@ -14,7 +14,8 @@
     "lint:style": "stylelint \"src/**/*.css\" --ignore-path .gitignore",
     "fix:lint": "npm run lint:js -- --fix && npm run lint:style -- --fix && npm run lint:prettier -- --write",
     "start": "next start",
-    "typecheck": "npm run hcm && tsc --noEmit"
+    "typecheck": "npm run hcm && tsc --noEmit",
+    "format": "prettier --write \"./**/*.{ts,tsx,js}\" --ignore-path .gitignore"
   },
   "dependencies": {
     "next": "^15.1.7",

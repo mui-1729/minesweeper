@@ -365,9 +365,14 @@ export default function Home() {
               min={5}
               max={40}
               value={customSetting.width}
-              onChange={(event) =>
-                setCustomSetting((prev) => ({ ...prev, width: Number(event.target.value) }))
-              }
+              onChange={(event) => {
+                const newWidth = Math.max(5, Math.min(40, Number(event.target.value)));
+                setCustomSetting((prev) => {
+                  const totalCells = newWidth * prev.height;
+                  const newBombCount = Math.min(prev.bombCount, Math.max(1, totalCells - 9));
+                  return { ...prev, width: newWidth, bombCount: newBombCount };
+                });
+              }}
             />
           </label>
           <label>
@@ -377,9 +382,14 @@ export default function Home() {
               min={5}
               max={40}
               value={customSetting.height}
-              onChange={(event) =>
-                setCustomSetting((prev) => ({ ...prev, height: Number(event.target.value) }))
-              }
+              onChange={(event) => {
+                const newHeight = Math.max(5, Math.min(40, Number(event.target.value)));
+                setCustomSetting((prev) => {
+                  const totalCells = newHeight * prev.width;
+                  const newBombCount = Math.min(prev.bombCount, Math.max(1, totalCells - 9));
+                  return { ...prev, height: newHeight, bombCount: newBombCount };
+                });
+              }}
             />
           </label>
           <label>
@@ -389,9 +399,12 @@ export default function Home() {
               min={1}
               max={customSetting.width * customSetting.height - 9}
               value={customSetting.bombCount}
-              onChange={(event) =>
-                setCustomSetting((prev) => ({ ...prev, bombCount: Number(event.target.value) }))
-              }
+              onChange={(event) => {
+                const totalCells = customSetting.width * customSetting.height;
+                const maxBombs = Math.max(1, totalCells - 9);
+                const newBombCount = Math.max(1, Math.min(maxBombs, Number(event.target.value)));
+                setCustomSetting((prev) => ({ ...prev, bombCount: newBombCount }));
+              }}
             />
           </label>
         </div>

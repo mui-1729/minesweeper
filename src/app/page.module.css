@@ -29,7 +29,7 @@
   align-items: center;
   justify-content: center;
   width: fit-content;
-  padding: 1.5%;
+  padding: 15px;
   background-color: #c6c6c6;
   border-top: 5px solid #fff;
   border-right: 5px solid #888;
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 5px 10px;
+  padding: 10px;
   margin-bottom: 15px;
   border-top: 5px solid #888;
   border-right: 5px solid #fff;
@@ -100,46 +100,6 @@
   border: 1px solid #000;
 }
 
-.timerDigit0 {
-  background-position-y: 0;
-}
-
-.timerDigit1 {
-  background-position-y: -50px;
-}
-
-.timerDigit2 {
-  background-position-y: -100px;
-}
-
-.timerDigit3 {
-  background-position-y: -150px;
-}
-
-.timerDigit4 {
-  background-position-y: -200px;
-}
-
-.timerDigit5 {
-  background-position-y: -250px;
-}
-
-.timerDigit6 {
-  background-position-y: -300px;
-}
-
-.timerDigit7 {
-  background-position-y: -350px;
-}
-
-.timerDigit8 {
-  background-position-y: -400px;
-}
-
-.timerDigit9 {
-  background-position-y: -450px;
-}
-
 .flagCount {
   text-align: center;
   cursor: pointer;
@@ -157,100 +117,44 @@
   justify-content: center;
   width: 30px;
   height: 30px;
+  background: url('~/src/assets/images/icons.png') no-repeat;
   border: 1px solid #000;
 }
 
+.cellOpen {
+  background-color: #c6c6c6;
+}
+
 .cellBomb {
-  background: url('~/src/assets/images/icons.png') -300px no-repeat;
+  background-position: -300px;
 }
 
 .cellClickBomb {
-  background: url('~/src/assets/images/icons.png') -300px no-repeat;
   background-color: red;
+  background-position: -300px;
 }
 
 .cellFlag {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: url('~/src/assets/images/icons.png') -207px no-repeat;
   background-color: #c6c6c6;
-  background-origin: content-box;
-  background-size: 325px 23px;
-  border-top: 3.5px solid #fff;
-  border-right: 3.5px solid #888;
-  border-bottom: 3.5px solid #888;
-  border-left: 3.5px solid #fff;
+  background-position: -270px;
 }
 
 .cellQuestion {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: url('~/src/assets/images/icons.png') -185px no-repeat;
   background-color: #c6c6c6;
-  background-size: 325px 23px;
-  border-top: 3.5px solid #fff;
-  border-right: 3.5px solid #888;
-  border-bottom: 3.5px solid #888;
-  border-left: 3.5px solid #fff;
+  background-position: -240px;
 }
 
 .cellHide {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
   background-color: #c6c6c6;
-  border-top: 3.5px solid #fff;
-  border-right: 3.5px solid #888;
-  border-bottom: 3.5px solid #888;
-  border-left: 3.5px solid #fff;
+  background-image: none !important;
+  border-top: 3px solid #fff;
+  border-right: 3px solid #808080;
+  border-bottom: 3px solid #808080;
+  border-left: 3px solid #fff;
 }
 
 .custom {
   display: flex;
   gap: 8px;
   margin-top: 10px;
-}
-
-.cell0 {
-  background-color: #c6c6c6;
-}
-
-.cell1 {
-  background: url('~/src/assets/images/icons.png') no-repeat;
-}
-
-.cell2 {
-  background: url('~/src/assets/images/icons.png') -30px no-repeat;
-}
-
-.cell3 {
-  background: url('~/src/assets/images/icons.png') -60px no-repeat;
-}
-
-.cell4 {
-  background: url('~/src/assets/images/icons.png') -90px no-repeat;
-}
-
-.cell5 {
-  background: url('~/src/assets/images/icons.png') -120px no-repeat;
-}
-
-.cell6 {
-  background: url('~/src/assets/images/icons.png') -150px no-repeat;
-}
-
-.cell7 {
-  background: url('~/src/assets/images/icons.png') -180px no-repeat;
-}
-
-.cell8 {
-  background: url('~/src/assets/images/icons.png') -210px no-repeat;
 }

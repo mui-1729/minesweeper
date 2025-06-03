@@ -112,26 +112,16 @@ const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] 
   return currentBoard;
 };
 
-type timerDigitKey =
-  | 'timerDigit1'
-  | 'timerDigit2'
-  | 'timerDigit3'
-  | 'timerDigit4'
-  | 'timerDigit5'
-  | 'timerDigit6'
-  | 'timerDigit7'
-  | 'timerDigit8'
-  | 'timerDigit9'
-  | 'timerDigit0';
-
 //タイマーデジタル表記
 const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const digits = seconds.toString().padStart(3, '0').split('');
   return (
     <div className={styles.timer}>
-      {digits.map((digit, i) => {
-        const key = `timerDigit${digit}` as timerDigitKey;
-        return <div key={i} className={`${styles.timerDigit} ${styles[key]}`} />;
+      {digits.map((digitString, i) => {
+        const digitValue = parseInt(digitString, 10);
+        const backgroundPositionY = digitValue * -50;
+        const digitInlineStyle = { backgroundPosition: `0 ${backgroundPositionY}px` };
+        return <div key={i} className={styles.timerDigit} style={digitInlineStyle} />;
       })}
     </div>
   );
@@ -142,9 +132,11 @@ const FlagDisplay = ({ flags }: { flags: number }) => {
   const digits = Math.max(0, flags).toString().padStart(3, '0').split('');
   return (
     <div className={styles.flagCount}>
-      {digits.map((digit, i) => {
-        const key = `timerDigit${digit}` as timerDigitKey;
-        return <div key={i} className={`${styles.timerDigit} ${styles[key]}`} />;
+      {digits.map((digitString, i) => {
+        const digitValue = parseInt(digitString, 10);
+        const backgroundPositionY = digitValue * -50;
+        const digitInlineStyle = { backgroundPosition: `0 ${backgroundPositionY}px` };
+        return <div key={i} className={styles.timerDigit} style={digitInlineStyle} />;
       })}
     </div>
   );
@@ -424,49 +416,60 @@ export default function Home() {
           ).map((row, y) => (
             <div key={y} className={styles.row}>
               {row.map((cell, x) => {
-                type classKeys =
-                  | 'cellHide'
-                  | 'cellFlag'
-                  | 'cellQuestion'
-                  | 'cellBomb'
-                  | 'cellClickBomb'
-                  | 'cell0'
-                  | 'cell1'
-                  | 'cell2'
-                  | 'cell3'
-                  | 'cell4'
-                  | 'cell5'
-                  | 'cell6'
-                  | 'cell7'
-                  | 'cell8';
-                let classKey: classKeys;
+                let cellContentClass: string = '';
+                let cellPositionX: number | null = null;
+                console.log(0);
                 if (userInputs[y][x] === 'Flag') {
-                  classKey = 'cellFlag';
+                  console.log(1);
+                  cellContentClass = styles.cellFlag;
                 } else if (userInputs[y][x] === 'Question') {
-                  classKey = 'cellQuestion';
+                  console.log(2);
+                  cellContentClass = styles.cellQuestion;
                 } else if (userInputs[y][x] === 'ClickBomb') {
-                  classKey = 'cellClickBomb';
+                  console.log(3);
+                  cellContentClass = styles.cellClickBomb;
                 } else if (userInputs[y][x] === 'Open') {
-                  if (cell >= 0) {
-                    classKey = `cell${cell}` as typeof classKey;
+                  console.log(4);
+                  if (cell >= 1) {
+                    console.log(5);
+                    cellContentClass = styles.cellOpen;
+                    cellPositionX = (cell - 1) * 30;
+                  } else if (cell === 0) {
+                    console.log(6);
+                    cellContentClass = styles.cellOpen;
+                    cellPositionX = -30;
                   } else if (cell === -2) {
-                    classKey = 'cellBomb';
+                    console.log(7);
+                    cellContentClass = styles.cellBomb;
                   } else {
-                    classKey = 'cellHide';
+                    cellContentClass = styles.cellHide;
                   }
                 } else {
-                  if (cell >= 0) {
-                    classKey = `cell${cell}` as classKeys;
+                  if (!isGameFinishRef) {
+                    cellContentClass = styles.cellHide;
+                  } else if (cell === 0) {
+                    console.log(9);
+                    cellContentClass = styles.cellOpen;
+                    cellPositionX = -30;
                   } else if (cell === -2 && isGameFinishRef) {
-                    classKey = 'cellBomb';
+                    console.log(10);
+                    cellContentClass = styles.cellBomb;
+                  } else if (cell >= 1 && cell <= 8) {
+                    cellContentClass = styles.cellOpen;
+                    cellPositionX = (cell - 1) * 30;
                   } else {
-                    classKey = 'cellHide';
+                    cellContentClass = styles.cellHide;
                   }
                 }
+
+                const inlineStyle =
+                  cellPositionX !== null ? { backgroundPosition: `${-1 * cellPositionX}px 0` } : {};
+
                 return (
                   <div
                     key={`${y}-${x}`}
-                    className={`${styles.cell} ${styles[classKey]}`}
+                    style={inlineStyle}
+                    className={`${styles.cell} ${cellContentClass}`}
                     onClick={() => LeftClickHandler(x, y)}
                     onContextMenu={(event) => RightClickHandler(event, x, y)}
                   />

@@ -188,6 +188,7 @@ export default function Home() {
     event.preventDefault();
 
     if (isGameFinishRef.current === true) return;
+    if (board[y][x] !== -1) return;
 
     setUserInputs((prev) => {
       const newInputs = prev.map((row) => [...row]);
@@ -419,16 +420,7 @@ export default function Home() {
                 let cellContentClass: string = '';
                 let cellPositionX: number | null = null;
                 console.log(0);
-                if (userInputs[y][x] === 'Flag') {
-                  console.log(1);
-                  cellContentClass = styles.cellFlag;
-                } else if (userInputs[y][x] === 'Question') {
-                  console.log(2);
-                  cellContentClass = styles.cellQuestion;
-                } else if (userInputs[y][x] === 'ClickBomb') {
-                  console.log(3);
-                  cellContentClass = styles.cellClickBomb;
-                } else if (userInputs[y][x] === 'Open') {
+                if (userInputs[y][x] === 'Open') {
                   console.log(4);
                   if (cell >= 1) {
                     console.log(5);
@@ -444,6 +436,15 @@ export default function Home() {
                   } else {
                     cellContentClass = styles.cellHide;
                   }
+                } else if (userInputs[y][x] === 'Flag') {
+                  console.log(1);
+                  cellContentClass = styles.cellFlag;
+                } else if (userInputs[y][x] === 'Question') {
+                  console.log(2);
+                  cellContentClass = styles.cellQuestion;
+                } else if (userInputs[y][x] === 'ClickBomb') {
+                  console.log(3);
+                  cellContentClass = styles.cellClickBomb;
                 } else {
                   if (!isGameFinishRef) {
                     cellContentClass = styles.cellHide;

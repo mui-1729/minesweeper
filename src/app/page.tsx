@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 type cellAction = 'Question' | 'Open' | 'Flag' | 'ClickBomb' | null;
@@ -49,7 +49,7 @@ const generateBomb = (
 
     if (x === firstX && y === firstY) continue;
 
-    if ((x !== firstX || y !== firstY) && newMap[y][x] === 0) {
+    if (newMap[y][x] === 0) {
       newMap[y][x] = 1;
       bombPlace++;
     }
@@ -75,38 +75,24 @@ const countBoardAround = (x: number, y: number, bombMap: number[][]) => {
 const calcBoard = (userInputs: cellAction[][], bombMap: number[][]): number[][] => {
   const height = userInputs.length;
   const width = userInputs[0].length;
-  if (bombMap === null)
-    return Array.from({ length: height }, () => Array.from({ length: width }, () => -1));
-
   const currentBoard = Array.from({ length: height }, () =>
     Array.from({ length: width }, () => -1),
   );
 
-  // 再起関数
-  const blankChain = (x: number, y: number) => {
-    if (x < 0 || x >= width || y < 0 || y >= height || currentBoard[y][x] !== -1) return;
-
-    if (bombMap[y][x] === 1) return;
-
-    const count = countBoardAround(x, y, bombMap);
-    currentBoard[y][x] = count;
-
-    if (count === 0) {
-      for (const [dx, dy] of directions) {
-        blankChain(x + dx, y + dy);
-      }
-    }
-  };
-
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      userInputs[y][x] === 'ClickBomb'
-        ? (currentBoard[y][x] = -2)
-        : userInputs[y][x] === 'Open'
-          ? bombMap[y][x] === 1
-            ? (currentBoard[y][x] = -2)
-            : currentBoard[y][x] === -1 && blankChain(x, y)
-          : null;
+      const userInput = userInputs[y][x];
+      const isBomb = bombMap[y][x] === 1;
+
+      if (userInput === 'ClickBomb') {
+        currentBoard[y][x] = -2;
+      } else if (userInput === 'Open') {
+        if (isBomb) {
+          currentBoard[y][x] = -2;
+        } else {
+          currentBoard[y][x] = countBoardAround(x, y, bombMap);
+        }
+      }
     }
   }
   return currentBoard;
@@ -142,6 +128,28 @@ const FlagDisplay = ({ flags }: { flags: number }) => {
   );
 };
 
+const win = (board: number[][], bombMap: number[][]) => {
+  for (let y = 0; y < bombMap.length; y++) {
+    for (let x = 0; x < bombMap[0].length; x++) {
+      if (bombMap[y][x] === 0 && board[y][x] === -1) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+const lose = (userInputs: cellAction[][], bombMap: number[][]) => {
+  for (let y = 0; y < bombMap.length; y++) {
+    for (let x = 0; x < bombMap[0].length; x++) {
+      if (userInputs[y][x] === 'Open' && bombMap[y][x] === 1) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 export default function Home() {
   const [level, setLevel] = useState<Level>('easy');
   const [customSetting, setCustomSetting] = useState<Setting>({
@@ -154,9 +162,6 @@ export default function Home() {
   const { width, height, bombCount } = currentSetting;
 
   const [seconds, setSeconds] = useState(0);
-  const secondsRef = useRef(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isGameFinishRef = useRef(false);
 
   const [userInputs, setUserInputs] = useState<cellAction[][]>(
     Array.from({ length: height }, () => Array.from({ length: width }, () => null)),
@@ -165,29 +170,16 @@ export default function Home() {
     Array.from({ length: height }, () => Array.from({ length: width }, () => 0)),
   );
 
+  const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
+
   // 計算値
   const board = calcBoard(userInputs, bombMap);
-
-  // マップ更新
-  useEffect(() => {
-    const newInputs = Array.from({ length: height }, () =>
-      Array.from({ length: width }, () => null),
-    );
-    const newBombMap = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
-    setUserInputs(newInputs);
-    setBombMap(newBombMap);
-    isGameFinishRef.current = false;
-    secondsRef.current = 0;
-    setSeconds(0);
-    if (timerRef.current) clearInterval(timerRef.current);
-  }, [level, customSetting, height, width]);
-
-  const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
+  const isGameFinished = win(board, bombMap) || lose(userInputs, bombMap);
 
   const RightClickHandler = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
 
-    if (isGameFinishRef.current === true) return;
+    if (isGameFinished) return;
     if (board[y][x] !== -1) return;
 
     setUserInputs((prev) => {
@@ -201,149 +193,111 @@ export default function Home() {
   };
 
   const LeftClickHandler = (clickX: number, clickY: number) => {
-    if (isGameFinishRef.current === true) return;
-    if (userInputs[clickY][clickX] !== null) return;
-
-    if (isFirstMap === true) {
-      setBombMap(generateBomb(clickX, clickY, width, height, bombCount));
-
-      setUserInputs((prev) => {
-        const newInputs = prev.map((row) => [...row]);
-        newInputs[clickY][clickX] = 'Open';
-        return newInputs;
-      });
+    if (isGameFinished) return;
+    if (userInputs[clickY][clickX] !== null) {
       return;
     }
 
-    if (bombMap[clickY][clickX] === 1) {
-      isGameFinishRef.current = true;
-      if (timerRef.current) clearInterval(timerRef.current);
+    let bombMapForThisClick = bombMap;
 
-      setUserInputs((prev) => {
-        const newInputs = prev.map((row) => [...row]);
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            if (bombMap[y][x] === 1) {
-              if (y === clickY && x === clickX) {
-                newInputs[clickY][clickX] = 'ClickBomb';
-              } else {
-                if (newInputs[y][x] !== 'Flag') {
-                  newInputs[y][x] = 'Open';
-                }
-              }
+    if (isFirstMap) {
+      const newGeneratedBombMap = generateBomb(clickX, clickY, width, height, bombCount);
+      setBombMap(newGeneratedBombMap);
+      bombMapForThisClick = newGeneratedBombMap;
+    }
+
+    setUserInputs((prevUserInputs) => {
+      let newInputs = prevUserInputs.map((row) => [...row]);
+      let clickedBomb = false;
+
+      if (bombMapForThisClick[clickY][clickX] === 1 && !isFirstMap) {
+        newInputs[clickY][clickX] = 'ClickBomb';
+        clickedBomb = true;
+      } else {
+        const blankChain = (newInputs: cellAction[][], x: number, y: number) => {
+          if (x < 0 || x >= width || y < 0 || y >= height) return;
+          if (newInputs[y][x] === 'Open' || newInputs[y][x] === 'Flag') return;
+          if (bombMapForThisClick[y][x] === 1) return;
+
+          newInputs[y][x] = 'Open';
+          const bombsAround = countBoardAround(x, y, bombMapForThisClick);
+
+          if (bombsAround === 0) {
+            for (const [dx, dy] of directions) {
+              blankChain(newInputs, x + dx, y + dy);
             }
           }
-        }
+        };
+        blankChain(newInputs, clickX, clickY);
+      }
 
-        return newInputs;
-      });
-      return;
-    }
+      const currentBoardState = calcBoard(newInputs, bombMapForThisClick);
 
-    setUserInputs((prev) => {
-      const newInputs = prev.map((row) => [...row]);
-      newInputs[clickY][clickX] = 'Open';
+      if (win(currentBoardState, bombMapForThisClick)) {
+        newInputs = newInputs.map((row, y) =>
+          row.map((cell, x) => {
+            if (bombMapForThisClick[y][x] === 1 && cell !== 'Flag') {
+              return 'Flag';
+            }
+            return cell;
+          }),
+        );
+      } else if (clickedBomb || lose(newInputs, bombMapForThisClick)) {
+        newInputs = newInputs.map((row, y) =>
+          row.map((cell, x) => {
+            if (bombMapForThisClick[y][x] === 1) {
+              if (clickedBomb && y === clickY && x === clickX) {
+                return 'ClickBomb';
+              } else if (cell !== 'Flag') {
+                return 'Open';
+              }
+            }
+            return cell;
+          }),
+        );
+      }
+
       return newInputs;
     });
   };
 
-  // クリア時の旗立て
-  useEffect(() => {
-    if (isGameFinishRef.current === true) return;
-    if (win(board, bombMap) === true) {
-      setUserInputs((prevUserInputs) => {
-        const newInputs = prevUserInputs.map((row) => [...row]);
-        for (let r = 0; r < height; r++) {
-          for (let c = 0; c < width; c++) {
-            if (bombMap[r][c] === 1) {
-              newInputs[r][c] = 'Flag';
-            }
-          }
-        }
-        return newInputs;
-      });
-      isGameFinishRef.current = true;
-    }
-  }, [board, bombMap, height, width]);
-
-  const resetClickHandler = () => {
-    isGameFinishRef.current = false;
+  const resetGameStates = (Setting: Setting) => {
+    const { width, height } = Setting;
     setUserInputs(Array.from({ length: height }, () => Array.from({ length: width }, () => null)));
     setBombMap(Array.from({ length: height }, () => Array.from({ length: width }, () => 0)));
-    secondsRef.current = 0;
     setSeconds(0);
-    if (timerRef.current) clearInterval(timerRef.current);
   };
 
-  const win = (board: number[][], bombMap: number[][]) => {
-    for (let y = 0; y < bombMap.length; y++) {
-      for (let x = 0; x < bombMap[0].length; x++) {
-        if (bombMap[y][x] === 0 && board[y][x] === -1) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const lose = (userInputs: cellAction[][], bombMap: number[][]) => {
-    for (let y = 0; y < bombMap.length; y++) {
-      for (let x = 0; x < bombMap[0].length; x++) {
-        if (userInputs[y][x] === 'Open' && bombMap[y][x] === 1) {
-          return true;
-        }
-      }
-    }
-    return false;
+  const levelChangeHandler = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLevel = event.target.value as Level;
+    const newSetting = newLevel === 'custom' ? customSetting : BasicSetting[newLevel];
+    resetGameStates(newSetting);
+    setLevel(newLevel);
   };
 
   // 時間関係
   useEffect(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    if (isGameFinishRef.current) {
-      return;
-    }
-
-    const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
+    if (isGameFinished) return;
 
     if (isFirstMap) {
-      secondsRef.current = 0;
       setSeconds(0);
       return;
     }
 
-    timerRef.current = setInterval(() => {
-      secondsRef.current += 1;
-      setSeconds(secondsRef.current);
+    const timer = setInterval(() => {
+      setSeconds((prevSeconds) => prevSeconds + 1);
     }, 1000);
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      clearInterval(timer);
     };
-  }, [bombMap, userInputs, board]);
-
-  // ゲーム終了判定
-  useEffect(() => {
-    if (isGameFinishRef.current) return;
-
-    if (win(board, bombMap) || lose(userInputs, bombMap)) {
-      isGameFinishRef.current = true;
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-  }, [board, bombMap, userInputs]);
+  }, [isGameFinished, isFirstMap]);
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
   return (
     <div className={styles.container}>
-      <select value={level} onChange={(event) => setLevel(event.target.value as Level)}>
+      <select value={level} onChange={levelChangeHandler}>
         <option value={'easy'}>初級</option>
         <option value={'normal'}>中級</option>
         <option value={'hard'}>上級</option>
@@ -360,11 +314,20 @@ export default function Home() {
               value={customSetting.width}
               onChange={(event) => {
                 const newWidth = Math.max(5, Math.min(40, Number(event.target.value)));
+                const totalCells = newWidth * customSetting.height;
+                const newBombCount = Math.min(
+                  currentSetting.bombCount,
+                  Math.max(1, totalCells - 9),
+                );
+
                 setCustomSetting((prev) => {
-                  const totalCells = newWidth * prev.height;
-                  const newBombCount = Math.min(prev.bombCount, Math.max(1, totalCells - 9));
                   return { ...prev, width: newWidth, bombCount: newBombCount };
                 });
+                return {
+                  width: newWidth,
+                  height: customSetting.height,
+                  bombCount: newBombCount,
+                };
               }}
             />
           </label>
@@ -377,11 +340,19 @@ export default function Home() {
               value={customSetting.height}
               onChange={(event) => {
                 const newHeight = Math.max(5, Math.min(40, Number(event.target.value)));
+                const totalCells = newHeight * customSetting.width;
+                const newBombCount = Math.min(
+                  currentSetting.bombCount,
+                  Math.max(1, totalCells - 9),
+                );
                 setCustomSetting((prev) => {
-                  const totalCells = newHeight * prev.width;
-                  const newBombCount = Math.min(prev.bombCount, Math.max(1, totalCells - 9));
                   return { ...prev, height: newHeight, bombCount: newBombCount };
                 });
+                return {
+                  width: customSetting.width,
+                  height: newHeight,
+                  bombCount: newBombCount,
+                };
               }}
             />
           </label>
@@ -397,6 +368,12 @@ export default function Home() {
                 const maxBombs = Math.max(1, totalCells - 9);
                 const newBombCount = Math.max(1, Math.min(maxBombs, Number(event.target.value)));
                 setCustomSetting((prev) => ({ ...prev, bombCount: newBombCount }));
+
+                return {
+                  width: customSetting.width,
+                  height: customSetting.height,
+                  bombCount: newBombCount,
+                };
               }}
             />
           </label>
@@ -407,7 +384,7 @@ export default function Home() {
           <FlagDisplay flags={flagCount} />
           <button
             className={`${styles.face} ${win(board, bombMap) ? styles.cool : lose(userInputs, bombMap) ? styles.sad : styles.smile}`}
-            onClick={resetClickHandler}
+            onClick={() => resetGameStates(currentSetting)}
           />
           <TimerDisplay seconds={seconds} />
         </div>
@@ -419,42 +396,30 @@ export default function Home() {
               {row.map((cell, x) => {
                 let cellContentClass: string = '';
                 let cellPositionX: number | null = null;
-                console.log(0);
                 if (userInputs[y][x] === 'Open') {
-                  console.log(4);
                   if (cell >= 1) {
-                    console.log(5);
                     cellContentClass = styles.cellOpen;
                     cellPositionX = (cell - 1) * 30;
                   } else if (cell === 0) {
-                    console.log(6);
                     cellContentClass = styles.cellOpen;
                     cellPositionX = -30;
                   } else if (cell === -2) {
-                    console.log(7);
                     cellContentClass = styles.cellBomb;
                   } else {
                     cellContentClass = styles.cellHide;
                   }
                 } else if (userInputs[y][x] === 'Flag') {
-                  console.log(1);
                   cellContentClass = styles.cellFlag;
                 } else if (userInputs[y][x] === 'Question') {
-                  console.log(2);
                   cellContentClass = styles.cellQuestion;
                 } else if (userInputs[y][x] === 'ClickBomb') {
-                  console.log(3);
                   cellContentClass = styles.cellClickBomb;
                 } else {
-                  if (!isGameFinishRef) {
+                  if (!isGameFinished) {
                     cellContentClass = styles.cellHide;
                   } else if (cell === 0) {
-                    console.log(9);
                     cellContentClass = styles.cellOpen;
                     cellPositionX = -30;
-                  } else if (cell === -2 && isGameFinishRef) {
-                    console.log(10);
-                    cellContentClass = styles.cellBomb;
                   } else if (cell >= 1 && cell <= 8) {
                     cellContentClass = styles.cellOpen;
                     cellPositionX = (cell - 1) * 30;

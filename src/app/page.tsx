@@ -199,13 +199,14 @@ export default function Home() {
   };
 
   const LeftClickHandler = (clickX: number, clickY: number) => {
+    if (gameStatus === 'win' || gameStatus === 'lose') return;
+
     let bombMapForThisClick = bombMap;
     if (gameStatus === 'firstMap') {
       const newGeneratedBombMap = generateBomb(clickX, clickY, width, height, bombCount);
       setBombMap(newGeneratedBombMap);
       bombMapForThisClick = newGeneratedBombMap;
     }
-    if (gameStatus !== 'playing') return;
     if (userInputs[clickY][clickX] !== null) {
       return;
     }

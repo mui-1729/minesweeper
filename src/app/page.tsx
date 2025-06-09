@@ -170,16 +170,22 @@ export default function Home() {
     Array.from({ length: height }, () => Array.from({ length: width }, () => 0)),
   );
 
-  const isFirstMap = bombMap.every((row) => row.every((cell) => cell === 0));
-
   // 計算値
   const board = calcBoard(userInputs, bombMap);
-  const isGameFinished = win(board, bombMap) || lose(userInputs, bombMap);
+  const gameStatus: 'firstMap' | 'playing' | 'win' | 'lose' = bombMap.every((row) =>
+    row.every((cell) => cell === 0),
+  )
+    ? 'firstMap'
+    : win(board, bombMap)
+      ? 'win'
+      : lose(userInputs, bombMap)
+        ? 'lose'
+        : 'playing';
 
   const RightClickHandler = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
 
-    if (isGameFinished) return;
+    if (gameStatus !== 'playing') return;
     if (board[y][x] !== -1) return;
 
     setUserInputs((prev) => {
@@ -193,30 +199,28 @@ export default function Home() {
   };
 
   const LeftClickHandler = (clickX: number, clickY: number) => {
-    if (isGameFinished) return;
-    if (userInputs[clickY][clickX] !== null) {
-      return;
-    }
-
     let bombMapForThisClick = bombMap;
-
-    if (isFirstMap) {
+    if (gameStatus === 'firstMap') {
       const newGeneratedBombMap = generateBomb(clickX, clickY, width, height, bombCount);
       setBombMap(newGeneratedBombMap);
       bombMapForThisClick = newGeneratedBombMap;
+    }
+    if (gameStatus !== 'playing') return;
+    if (userInputs[clickY][clickX] !== null) {
+      return;
     }
 
     setUserInputs((prevUserInputs) => {
       let newInputs = prevUserInputs.map((row) => [...row]);
       let clickedBomb = false;
 
-      if (bombMapForThisClick[clickY][clickX] === 1 && !isFirstMap) {
+      if (bombMapForThisClick[clickY][clickX] === 1 && gameStatus === 'playing') {
         newInputs[clickY][clickX] = 'ClickBomb';
         clickedBomb = true;
       } else {
         const blankChain = (newInputs: cellAction[][], x: number, y: number) => {
           if (x < 0 || x >= width || y < 0 || y >= height) return;
-          if (newInputs[y][x] === 'Open' || newInputs[y][x] === 'Flag') return;
+          if (newInputs[y][x] === 'Open') return;
           if (bombMapForThisClick[y][x] === 1) return;
 
           newInputs[y][x] = 'Open';
@@ -277,12 +281,11 @@ export default function Home() {
 
   // 時間関係
   useEffect(() => {
-    if (isGameFinished) return;
-
-    if (isFirstMap) {
+    if (gameStatus === 'firstMap') {
       setSeconds(0);
       return;
     }
+    if (gameStatus !== 'playing') return;
 
     const timer = setInterval(() => {
       setSeconds((prevSeconds) => prevSeconds + 1);
@@ -291,9 +294,86 @@ export default function Home() {
     return () => {
       clearInterval(timer);
     };
-  }, [isGameFinished, isFirstMap]);
+  }, [gameStatus]);
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
+
+  const boardStates = (x: number, y: number, cell: number) => {
+    let cellContentClass: string = '';
+    let cellPositionX: number | null = null;
+    if (userInputs[y][x] === 'Open') {
+      if (cell >= 1) {
+        cellContentClass = styles.cellOpen;
+        cellPositionX = (cell - 1) * 30;
+      } else if (cell === 0) {
+        cellContentClass = styles.cellOpen;
+        cellPositionX = -30;
+      } else if (cell === -2) {
+        cellContentClass = styles.cellBomb;
+      } else {
+        cellContentClass = styles.cellHide;
+      }
+    } else if (userInputs[y][x] === 'Flag') {
+      cellContentClass = styles.cellFlag;
+    } else if (userInputs[y][x] === 'Question') {
+      cellContentClass = styles.cellQuestion;
+    } else if (userInputs[y][x] === 'ClickBomb') {
+      cellContentClass = styles.cellClickBomb;
+    } else {
+      if (gameStatus === 'firstMap' || gameStatus === 'lose') {
+        cellContentClass = styles.cellHide;
+      } else if (cell === 0) {
+        cellContentClass = styles.cellOpen;
+        cellPositionX = -30;
+      } else if (cell >= 1 && cell <= 8) {
+        cellContentClass = styles.cellOpen;
+        cellPositionX = (cell - 1) * 30;
+      } else {
+        cellContentClass = styles.cellHide;
+      }
+    }
+
+    const inlineStyle =
+      cellPositionX !== null ? { backgroundPosition: `${-1 * cellPositionX}px 0` } : {};
+
+    return { cellContentClass, inlineStyle };
+  };
+
+  const newBoardState = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    field: 'height' | 'width' | 'bombCount',
+  ) => {
+    const userValue = Number(event.target.value);
+    let newSettings: Setting;
+
+    if (field === 'height' || field === 'width') {
+      const newValue = Math.max(5, Math.min(40, userValue));
+      const newHeight = field === 'height' ? newValue : currentSetting.height;
+      const newWidth = field === 'width' ? newValue : currentSetting.width;
+      const totalCells = newWidth * newHeight;
+      const maxBombs = Math.max(1, totalCells - 9);
+      const newBombCount = Math.min(currentSetting.bombCount, maxBombs);
+
+      newSettings = {
+        height: newHeight,
+        width: newWidth,
+        bombCount: newBombCount,
+      };
+    } else {
+      const totalCells = currentSetting.width * currentSetting.height;
+      const maxBombs = Math.max(1, totalCells - 9);
+      const minBombs = 1;
+
+      const newBombCount = Math.max(minBombs, Math.min(userValue, maxBombs));
+
+      newSettings = {
+        ...currentSetting,
+        bombCount: newBombCount,
+      };
+    }
+    setCustomSetting(newSettings);
+    resetGameStates(newSettings);
+  };
 
   return (
     <div className={styles.container}>
@@ -312,23 +392,7 @@ export default function Home() {
               min={5}
               max={40}
               value={customSetting.width}
-              onChange={(event) => {
-                const newWidth = Math.max(5, Math.min(40, Number(event.target.value)));
-                const totalCells = newWidth * customSetting.height;
-                const newBombCount = Math.min(
-                  currentSetting.bombCount,
-                  Math.max(1, totalCells - 9),
-                );
-
-                setCustomSetting((prev) => {
-                  return { ...prev, width: newWidth, bombCount: newBombCount };
-                });
-                return {
-                  width: newWidth,
-                  height: customSetting.height,
-                  bombCount: newBombCount,
-                };
-              }}
+              onChange={(event) => newBoardState(event, 'width')}
             />
           </label>
           <label>
@@ -338,22 +402,7 @@ export default function Home() {
               min={5}
               max={40}
               value={customSetting.height}
-              onChange={(event) => {
-                const newHeight = Math.max(5, Math.min(40, Number(event.target.value)));
-                const totalCells = newHeight * customSetting.width;
-                const newBombCount = Math.min(
-                  currentSetting.bombCount,
-                  Math.max(1, totalCells - 9),
-                );
-                setCustomSetting((prev) => {
-                  return { ...prev, height: newHeight, bombCount: newBombCount };
-                });
-                return {
-                  width: customSetting.width,
-                  height: newHeight,
-                  bombCount: newBombCount,
-                };
-              }}
+              onChange={(event) => newBoardState(event, 'height')}
             />
           </label>
           <label>
@@ -363,18 +412,7 @@ export default function Home() {
               min={1}
               max={customSetting.width * customSetting.height - 9}
               value={customSetting.bombCount}
-              onChange={(event) => {
-                const totalCells = customSetting.width * customSetting.height;
-                const maxBombs = Math.max(1, totalCells - 9);
-                const newBombCount = Math.max(1, Math.min(maxBombs, Number(event.target.value)));
-                setCustomSetting((prev) => ({ ...prev, bombCount: newBombCount }));
-
-                return {
-                  width: customSetting.width,
-                  height: customSetting.height,
-                  bombCount: newBombCount,
-                };
-              }}
+              onChange={(event) => newBoardState(event, 'bombCount')}
             />
           </label>
         </div>
@@ -394,48 +432,12 @@ export default function Home() {
           ).map((row, y) => (
             <div key={y} className={styles.row}>
               {row.map((cell, x) => {
-                let cellContentClass: string = '';
-                let cellPositionX: number | null = null;
-                if (userInputs[y][x] === 'Open') {
-                  if (cell >= 1) {
-                    cellContentClass = styles.cellOpen;
-                    cellPositionX = (cell - 1) * 30;
-                  } else if (cell === 0) {
-                    cellContentClass = styles.cellOpen;
-                    cellPositionX = -30;
-                  } else if (cell === -2) {
-                    cellContentClass = styles.cellBomb;
-                  } else {
-                    cellContentClass = styles.cellHide;
-                  }
-                } else if (userInputs[y][x] === 'Flag') {
-                  cellContentClass = styles.cellFlag;
-                } else if (userInputs[y][x] === 'Question') {
-                  cellContentClass = styles.cellQuestion;
-                } else if (userInputs[y][x] === 'ClickBomb') {
-                  cellContentClass = styles.cellClickBomb;
-                } else {
-                  if (!isGameFinished) {
-                    cellContentClass = styles.cellHide;
-                  } else if (cell === 0) {
-                    cellContentClass = styles.cellOpen;
-                    cellPositionX = -30;
-                  } else if (cell >= 1 && cell <= 8) {
-                    cellContentClass = styles.cellOpen;
-                    cellPositionX = (cell - 1) * 30;
-                  } else {
-                    cellContentClass = styles.cellHide;
-                  }
-                }
-
-                const inlineStyle =
-                  cellPositionX !== null ? { backgroundPosition: `${-1 * cellPositionX}px 0` } : {};
-
+                // const { cellContentClass, inlineStyle } = boardStates(x, y, cell);
                 return (
                   <div
                     key={`${y}-${x}`}
-                    style={inlineStyle}
-                    className={`${styles.cell} ${cellContentClass}`}
+                    style={boardStates(x, y, cell).inlineStyle}
+                    className={`${styles.cell} ${boardStates(x, y, cell).cellContentClass}`}
                     onClick={() => LeftClickHandler(x, y)}
                     onContextMenu={(event) => RightClickHandler(event, x, y)}
                   />

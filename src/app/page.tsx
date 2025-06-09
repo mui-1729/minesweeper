@@ -299,16 +299,13 @@ export default function Home() {
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
-  const boardStates = (x: number, y: number, cell: number) => {
+  const boardClassStates = (x: number, y: number, cell: number) => {
     let cellContentClass: string = '';
-    let cellPositionX: number | null = null;
     if (userInputs[y][x] === 'Open') {
       if (cell >= 1) {
         cellContentClass = styles.cellOpen;
-        cellPositionX = (cell - 1) * 30;
       } else if (cell === 0) {
         cellContentClass = styles.cellOpen;
-        cellPositionX = -30;
       } else if (cell === -2) {
         cellContentClass = styles.cellBomb;
       } else {
@@ -325,19 +322,28 @@ export default function Home() {
         cellContentClass = styles.cellHide;
       } else if (cell === 0) {
         cellContentClass = styles.cellOpen;
-        cellPositionX = -30;
       } else if (cell >= 1 && cell <= 8) {
         cellContentClass = styles.cellOpen;
-        cellPositionX = (cell - 1) * 30;
       } else {
         cellContentClass = styles.cellHide;
       }
     }
 
-    const inlineStyle =
-      cellPositionX !== null ? { backgroundPosition: `${-1 * cellPositionX}px 0` } : {};
+    return {
+      cellContentClass,
+    };
+  };
 
-    return { cellContentClass, inlineStyle };
+  const boardStyleState = (x: number, y: number, cell: number) => {
+    let cellPositionX: number | null = null;
+    if (cell >= 1) {
+      cellPositionX = (cell - 1) * -30;
+    } else if (cell === 0) {
+      cellPositionX = 30;
+    }
+    return cellPositionX !== null
+      ? { cellPositionX: { backgroundPosition: `${cellPositionX}px 0` } }
+      : {};
   };
 
   const newBoardState = (
@@ -433,12 +439,11 @@ export default function Home() {
           ).map((row, y) => (
             <div key={y} className={styles.row}>
               {row.map((cell, x) => {
-                // const { cellContentClass, inlineStyle } = boardStates(x, y, cell);
                 return (
                   <div
                     key={`${y}-${x}`}
-                    style={boardStates(x, y, cell).inlineStyle}
-                    className={`${styles.cell} ${boardStates(x, y, cell).cellContentClass}`}
+                    style={boardStyleState(x, y, cell).cellPositionX}
+                    className={`${styles.cell} ${boardClassStates(x, y, cell).cellContentClass}`}
                     onClick={() => LeftClickHandler(x, y)}
                     onContextMenu={(event) => RightClickHandler(event, x, y)}
                   />

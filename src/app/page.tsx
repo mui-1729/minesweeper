@@ -424,7 +424,7 @@ export default function Home() {
                     style={
                       cell < 0
                         ? undefined
-                        : { backgroundPosition: `${cell === 0 ? 30 : (cell - 1) * -30}px 0` }
+                        : { backgroundPosition: `${cell === 0 ? 30 : (cell - 1) * -30}px` }
                     }
                     className={`${styles.cell} ${styles[boardClassStates(x, y, cell)]}`}
                     onClick={() => LeftClickHandler(x, y)}

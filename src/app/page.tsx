@@ -304,7 +304,8 @@ export default function Home() {
       Flag: 'cellFlag',
       Question: 'cellQuestion',
       ClickBomb: 'cellClickBomb',
-    };
+    } as const;
+
     if (userInputs[y][x] === 'Open') {
       if (cell >= 0) {
         return 'cellOpen';

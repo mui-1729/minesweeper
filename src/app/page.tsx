@@ -300,50 +300,28 @@ export default function Home() {
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
   const boardClassStates = (x: number, y: number, cell: number) => {
-    let cellContentClass: string = '';
-    if (userInputs[y][x] === 'Open') {
-      if (cell >= 1) {
-        cellContentClass = styles.cellOpen;
-      } else if (cell === 0) {
-        cellContentClass = styles.cellOpen;
-      } else if (cell === -2) {
-        cellContentClass = styles.cellBomb;
-      } else {
-        cellContentClass = styles.cellHide;
-      }
-    } else if (userInputs[y][x] === 'Flag') {
-      cellContentClass = styles.cellFlag;
-    } else if (userInputs[y][x] === 'Question') {
-      cellContentClass = styles.cellQuestion;
-    } else if (userInputs[y][x] === 'ClickBomb') {
-      cellContentClass = styles.cellClickBomb;
-    } else {
-      if (gameStatus === 'firstMap' || gameStatus === 'lose') {
-        cellContentClass = styles.cellHide;
-      } else if (cell === 0) {
-        cellContentClass = styles.cellOpen;
-      } else if (cell >= 1 && cell <= 8) {
-        cellContentClass = styles.cellOpen;
-      } else {
-        cellContentClass = styles.cellHide;
-      }
-    }
-
-    return {
-      cellContentClass,
+    const actionBoard = {
+      Flag: 'cellFlag',
+      Question: 'cellQuestion',
+      ClickBomb: 'cellClickBomb',
     };
-  };
-
-  const boardStyleState = (x: number, y: number, cell: number) => {
-    let cellPositionX: number | null = null;
-    if (cell >= 1) {
-      cellPositionX = (cell - 1) * -30;
-    } else if (cell === 0) {
-      cellPositionX = 30;
-    }
-    return cellPositionX !== null
-      ? { cellPositionX: { backgroundPosition: `${cellPositionX}px 0` } }
-      : {};
+    if (userInputs[y][x] === 'Open') {
+      if (cell >= 0) {
+        return 'cellOpen';
+      } else if (cell === -2) {
+        return 'cellBomb';
+      } else {
+        return 'cellHide';
+      }
+    } else if (userInputs[y][x] === null) {
+      if (gameStatus === 'firstMap' || gameStatus === 'lose') {
+        return 'cellHide';
+      } else if (cell >= 1) {
+        return 'cellOpen';
+      } else {
+        return 'cellHide';
+      }
+    } else return actionBoard[userInputs[y][x]];
   };
 
   const newBoardState = (
@@ -442,8 +420,12 @@ export default function Home() {
                 return (
                   <div
                     key={`${y}-${x}`}
-                    style={boardStyleState(x, y, cell).cellPositionX}
-                    className={`${styles.cell} ${boardClassStates(x, y, cell).cellContentClass}`}
+                    style={
+                      cell < 0
+                        ? undefined
+                        : { backgroundPosition: `${cell === 0 ? 30 : (cell - 1) * -30}px 0` }
+                    }
+                    className={`${styles.cell} ${styles[boardClassStates(x, y, cell)]}`}
                     onClick={() => LeftClickHandler(x, y)}
                     onContextMenu={(event) => RightClickHandler(event, x, y)}
                   />

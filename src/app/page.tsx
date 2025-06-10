@@ -299,7 +299,7 @@ export default function Home() {
 
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
-  const boardClassStates = (x: number, y: number, cell: number) => {
+  const boardClassStates = (x: number, y: number, cell: number): keyof typeof styles => {
     const actionBoard = {
       Flag: 'cellFlag',
       Question: 'cellQuestion',

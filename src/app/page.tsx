@@ -300,12 +300,6 @@ export default function Home() {
   const flagCount = bombCount - userInputs.flat().filter((cell) => cell === 'Flag').length;
 
   const boardClassStates = (x: number, y: number, cell: number): keyof typeof styles => {
-    const actionBoard = {
-      Flag: 'cellFlag',
-      Question: 'cellQuestion',
-      ClickBomb: 'cellClickBomb',
-    } as const;
-
     if (userInputs[y][x] === 'Open') {
       if (cell >= 0) {
         return 'cellOpen';
@@ -322,7 +316,14 @@ export default function Home() {
       } else {
         return 'cellHide';
       }
-    } else return actionBoard[userInputs[y][x]];
+    } else
+      return (
+        {
+          Flag: 'cellFlag',
+          Question: 'cellQuestion',
+          ClickBomb: 'cellClickBomb',
+        } as const
+      )[userInputs[y][x]];
   };
 
   const newBoardState = (

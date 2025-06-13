@@ -185,7 +185,7 @@ export default function Home() {
   const RightClickHandler = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
 
-    if (gameStatus !== 'playing') return;
+    if (gameStatus === 'win' || gameStatus === 'lose') return;
     if (board[y][x] !== -1) return;
 
     setUserInputs((prev) => {

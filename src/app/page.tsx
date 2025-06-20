@@ -1,34 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { BasicSetting, directions } from '../constants';
+import type { cellAction, Level, Setting } from '../types';
 import styles from './page.module.css';
-
-type cellAction = 'Question' | 'Open' | 'Flag' | 'ClickBomb' | null;
-
-type Setting = {
-  width: number;
-  height: number;
-  bombCount: number;
-};
-type basicLevel = 'easy' | 'normal' | 'hard';
-type Level = basicLevel | 'custom';
-
-const BasicSetting: Record<basicLevel, Setting> = {
-  easy: { width: 9, height: 9, bombCount: 10 },
-  normal: { width: 16, height: 16, bombCount: 40 },
-  hard: { width: 30, height: 16, bombCount: 99 },
-};
-//方向
-const directions = [
-  [1, 0],
-  [1, 1],
-  [0, 1],
-  [-1, 0],
-  [-1, -1],
-  [0, -1],
-  [1, -1],
-  [-1, 1],
-];
 
 // 初手マップ生成
 const generateBomb = (
